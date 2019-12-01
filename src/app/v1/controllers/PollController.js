@@ -10,6 +10,7 @@ module.exports = class PollController {
         Poll
             .find({ 'visibility.public' : true })
             .sort({ createdAt: 'desc' })
+            .populate('creator', ['email', 'name'])
             .exec((error, polls) => {
                 res.send(polls);
             });
@@ -21,6 +22,7 @@ module.exports = class PollController {
     indexPopular(req, res) {
         Poll
             .find({ 'visibility.public' : true })
+            .populate('creator', ['email', 'name'])
             .exec((error, polls) => {
                 polls.sort((pollA, pollB) => {
                     let pollAVotes = 0;
@@ -47,6 +49,7 @@ module.exports = class PollController {
     indexInvited(req, res) {
         Poll
             .find({ 'visibility.invited' : req.user._id })
+            .populate('creator', ['email', 'name'])
             .sort({ createdAt: 'desc' })
             .exec((error, polls) => {
                 res.send(polls);
@@ -59,7 +62,7 @@ module.exports = class PollController {
     create(req, res, next) {
         const poll = new Poll(req.body);
 
-        poll.creatorId = req.user._id;
+        poll.creator = req.user._id;
 
         poll.save()
             .then(poll => {
@@ -90,6 +93,7 @@ module.exports = class PollController {
     show(req, res, next) {
         Poll.findOne({_id: req.params.pollId})
             .populate('visibility.invited', ['email', 'name'])
+            .populate('creator', ['email', 'name'])
             .exec((error, poll) => {
             if(!poll) {
                 return next();
@@ -102,7 +106,7 @@ module.exports = class PollController {
              *  - The poll is public.
              */
             if (
-                !poll.creatorId.equals(req.user._id) &&
+                !poll.creator.equals(req.user._id) &&
                 poll.visibility.invited.filter((_id) => _id.equals(req.user._id) ).length === 0 &&
                 poll.visibility.public !== true
             ) {
@@ -123,7 +127,7 @@ module.exports = class PollController {
          */
         Poll.findOne({
             _id: req.params.pollId,
-            creatorId: req.user._id,
+            creator: req.user._id,
         }).exec((error, poll) => {
             if(!poll) {
                 return next();
@@ -149,7 +153,7 @@ module.exports = class PollController {
          */
         Poll.findOne({
             _id: req.params.pollId,
-            creatorId: req.user._id,
+            creator: req.user._id,
         }).exec((error, poll) => {
             if(!poll) {
                 return next();
@@ -191,7 +195,7 @@ module.exports = class PollController {
              *  - The poll is public.
              */
             if (
-                !poll.creatorId.equals(req.user._id) &&
+                !poll.creator.equals(req.user._id) &&
                 poll.visibility.invited.filter((_id) => _id.equals(req.user._id) ).length === 0 &&
                 poll.visibility.public !== true
             ) {

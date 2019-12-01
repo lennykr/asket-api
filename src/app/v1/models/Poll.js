@@ -52,7 +52,7 @@ const pollSchema = new Schema({
         ]
     },
 
-    creatorId: {
+    creator: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,

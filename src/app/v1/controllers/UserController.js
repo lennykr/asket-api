@@ -51,8 +51,9 @@ module.exports = class UserController {
      */
     myPolls(req, res) {
         Poll
-            .find({ 'creatorId' : req.user._id })
+            .find({ 'creator' : req.user._id })
             .sort({ createdAt: 'desc' })
+            .populate('creator', ['email', 'name'])
             .exec((error, polls) => {
                 res.send(polls);
             });
