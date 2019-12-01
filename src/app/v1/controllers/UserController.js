@@ -78,9 +78,8 @@ module.exports = class UserController {
                     return new Promise((resolve) => {
                         friendship = friendship.toObject();
 
-                        User.find({ email: friendship.respondentEmail }, ['name', 'email'])
+                        User.findOne({ email: friendship.respondentEmail }, ['name', 'email'])
                             .exec((error, respondent) => {
-                                console.log('pushing')
                                 if(friendship.respondentEmail === req.user.email) {
                                     // The suitor is my friend, because I'm the respondent.
                                     friendship.friend = friendship.suitor;
