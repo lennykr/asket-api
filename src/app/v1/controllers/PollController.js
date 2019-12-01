@@ -88,7 +88,9 @@ module.exports = class PollController {
      * Show a poll.
      */
     show(req, res, next) {
-        Poll.findOne({_id: req.params.pollId}).exec((error, poll) => {
+        Poll.findOne({_id: req.params.pollId})
+            .populate('visibility.invited', ['email', 'name'])
+            .exec((error, poll) => {
             if(!poll) {
                 return next();
             }
@@ -104,7 +106,7 @@ module.exports = class PollController {
                 poll.visibility.invited.filter((_id) => _id.equals(req.user._id) ).length === 0 &&
                 poll.visibility.public !== true
             ) {
-                return res.status(401).send({ error: 'Access denied.' });
+                return res.status(401).send({ message: 'Access denied.' });
             }
 
             res.send(poll);
@@ -193,7 +195,7 @@ module.exports = class PollController {
                 poll.visibility.invited.filter((_id) => _id.equals(req.user._id) ).length === 0 &&
                 poll.visibility.public !== true
             ) {
-                return res.status(401).send({ error: 'Access denied.' });
+                return res.status(401).send({ message: 'Access denied.' });
             }
 
             let hasVoted = false;

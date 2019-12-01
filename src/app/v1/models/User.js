@@ -82,14 +82,14 @@ schema.statics.findByCredentials = (email, password) => {
         user => {
             return bcrypt.compare(password, user.password).then(isPasswordMatch => {
                 if (!isPasswordMatch) {
-                    throw new Error({ error: 'Invalid login credentials' });
+                    throw new Error({ message: 'Invalid login credentials' });
                 }
 
                 return user;
             });
         },
         error => {
-            throw new Error({ error: 'Invalid login credentials' });
+            throw new Error({ message: 'Invalid login credentials' });
         });
 }
 

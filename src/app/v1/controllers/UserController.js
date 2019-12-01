@@ -176,7 +176,7 @@ module.exports = class UserController {
                 },
 
                 error => {
-                    return res.status(401).send({error: 'Invalid credentials.'});
+                    return res.status(401).send({message: 'Invalid credentials.'});
                 });
         } catch (error) {
             res.status(400).send(error);

@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
         User.findOne({ _id: data._id, 'tokens.token': token }).then(
             user => {
                 if(!user) {
-                    res.status(401).send({ error: 'Invalid token.' });
+                    res.status(401).send({ message: 'Invalid token.' });
                 }
 
                 req.user = user;
@@ -21,6 +21,6 @@ module.exports = (req, res, next) => {
                 throw new Error();
             });
     } catch (error) {
-        res.status(401).send({ error: 'Authorization required.' });
+        res.status(401).send({ message: 'Authorization required.' });
     }
 }
