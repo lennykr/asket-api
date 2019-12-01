@@ -25,8 +25,8 @@ module.exports = class UserController {
         req.user.name = name;
 
         req.user.save().then(
-            () => {
-                res.send();
+            (user) => {
+                res.send(user);
             },
             error => {
                 res.status(500).send(error);
@@ -65,13 +65,37 @@ module.exports = class UserController {
         Friendship
             .find()
             .or([
-                { suitorId : req.user._id },
+                { suitor : req.user._id },
                 { respondentEmail : req.user.email }
             ])
             .where("acceptedAt").ne(null)
+            .populate('suitor', ['name', 'email'])
             .sort({ createdAt: 'asc' })
             .exec((error, friendships) => {
-                res.send(friendships);
+                const _friendships = [];
+                
+                const promises = friendships.map(friendship => {
+                    return new Promise((resolve) => {
+                        friendship = friendship.toObject();
+
+                        User.find({ email: friendship.respondentEmail }, ['name', 'email'])
+                            .exec((error, respondent) => {
+                                console.log('pushing')
+                                if(friendship.respondentEmail === req.user.email) {
+                                    // The suitor is my friend, because I'm the respondent.
+                                    friendship.friend = friendship.suitor;
+                                } else {
+                                    // The respondent is my friend, because I'm the suitor.
+                                    friendship.friend = respondent;
+                                }
+
+                                _friendships.push(friendship);
+                                resolve();
+                            });
+                    });
+                });
+
+                Promise.all(promises).then(() => res.send(_friendships));
             });
     }
 
@@ -108,6 +132,7 @@ module.exports = class UserController {
                 acceptedAt: null,
                 deniedAt: null
             })
+            .populate('suitor', ['name', 'email'])
             .sort({ createdAt: 'asc' })
             .exec((error, friendships) => {
                 res.send(friendships);
@@ -125,6 +150,12 @@ module.exports = class UserController {
                 user.generateAuthToken().then(token => {
                     res.status(201).send({ user, token });
                 });
+            }).catch(error => {
+                if(error.code === 11000) {
+                    res.status(400).send({message: 'User already registered.'});
+                }
+
+                res.status(400).send();
             });
         } catch (error) {
             res.status(400).send(error);

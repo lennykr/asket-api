@@ -8,7 +8,7 @@ module.exports = class FriendshipController {
     create(req, res) {
         const friendship = new Friendship();
 
-        friendship.suitorId = req.user._id;
+        friendship.suitor = req.user._id;
         friendship.respondentEmail = req.body.respondentEmail;
 
         friendship.save()
@@ -35,7 +35,7 @@ module.exports = class FriendshipController {
                     next();
                 }
 
-                if(!friendship.respondentEmail.equals(req.user.email)) {
+                if(friendship.respondentEmail !== req.user.email) {
                     return res.status(403).send(
                         "Only the invited friend can change the status of the friendship to 'accepted'."
                     );
@@ -70,7 +70,7 @@ module.exports = class FriendshipController {
                     next();
                 }
 
-                if(!friendship.respondentEmail.equals(req.user.email)) {
+                if(friendship.respondentEmail !== req.user.email) {
                     return res.status(403).send(
                         "Only the invited friend can change the status of the friendship to 'denied'."
                     );
@@ -107,8 +107,8 @@ module.exports = class FriendshipController {
             }
 
             if(
-                !friendship.suitorId.equals(req.user._id) &&
-                !friendship.respondentEmail.equals(req.user.email)
+                !friendship.suitor.equals(req.user._id) &&
+                friendship.respondentEmail !== req.user.email
             ) {
                 return res.status(401).send("Access denied.");
             }
